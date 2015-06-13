@@ -15,6 +15,9 @@
 		9C62F1281B2B5997006FD3A8 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9C62F1271B2B5997006FD3A8 /* Images.xcassets */; };
 		9C62F12B1B2B5997006FD3A8 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9C62F1291B2B5997006FD3A8 /* LaunchScreen.xib */; };
 		9C62F1371B2B5997006FD3A8 /* ReceiptsTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 9C62F1361B2B5997006FD3A8 /* ReceiptsTests.m */; };
+		9C62F1421B2B5C98006FD3A8 /* Label.m in Sources */ = {isa = PBXBuildFile; fileRef = 9C62F1411B2B5C98006FD3A8 /* Label.m */; };
+		9C62F1451B2B5C98006FD3A8 /* Receipt.m in Sources */ = {isa = PBXBuildFile; fileRef = 9C62F1441B2B5C98006FD3A8 /* Receipt.m */; };
+		9C62F1481B2B6B5D006FD3A8 /* AddReceiptViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9C62F1471B2B6B5D006FD3A8 /* AddReceiptViewController.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -42,6 +45,12 @@
 		9C62F1301B2B5997006FD3A8 /* ReceiptsTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ReceiptsTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		9C62F1351B2B5997006FD3A8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		9C62F1361B2B5997006FD3A8 /* ReceiptsTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ReceiptsTests.m; sourceTree = "<group>"; };
+		9C62F1401B2B5C98006FD3A8 /* Label.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Label.h; path = ../Label.h; sourceTree = "<group>"; };
+		9C62F1411B2B5C98006FD3A8 /* Label.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Label.m; path = ../Label.m; sourceTree = "<group>"; };
+		9C62F1431B2B5C98006FD3A8 /* Receipt.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Receipt.h; path = ../Receipt.h; sourceTree = "<group>"; };
+		9C62F1441B2B5C98006FD3A8 /* Receipt.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Receipt.m; path = ../Receipt.m; sourceTree = "<group>"; };
+		9C62F1461B2B6B5D006FD3A8 /* AddReceiptViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AddReceiptViewController.h; sourceTree = "<group>"; };
+		9C62F1471B2B6B5D006FD3A8 /* AddReceiptViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AddReceiptViewController.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -83,10 +92,16 @@
 		9C62F1161B2B5997006FD3A8 /* Receipts */ = {
 			isa = PBXGroup;
 			children = (
+				9C62F1431B2B5C98006FD3A8 /* Receipt.h */,
+				9C62F1441B2B5C98006FD3A8 /* Receipt.m */,
+				9C62F1401B2B5C98006FD3A8 /* Label.h */,
+				9C62F1411B2B5C98006FD3A8 /* Label.m */,
 				9C62F11B1B2B5997006FD3A8 /* AppDelegate.h */,
 				9C62F11C1B2B5997006FD3A8 /* AppDelegate.m */,
 				9C62F1211B2B5997006FD3A8 /* ViewController.h */,
 				9C62F1221B2B5997006FD3A8 /* ViewController.m */,
+				9C62F1461B2B6B5D006FD3A8 /* AddReceiptViewController.h */,
+				9C62F1471B2B6B5D006FD3A8 /* AddReceiptViewController.m */,
 				9C62F1241B2B5997006FD3A8 /* Main.storyboard */,
 				9C62F1271B2B5997006FD3A8 /* Images.xcassets */,
 				9C62F1291B2B5997006FD3A8 /* LaunchScreen.xib */,
@@ -223,8 +238,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				9C62F1201B2B5997006FD3A8 /* Receipts.xcdatamodeld in Sources */,
+				9C62F1481B2B6B5D006FD3A8 /* AddReceiptViewController.m in Sources */,
 				9C62F11D1B2B5997006FD3A8 /* AppDelegate.m in Sources */,
+				9C62F1451B2B5C98006FD3A8 /* Receipt.m in Sources */,
 				9C62F1231B2B5997006FD3A8 /* ViewController.m in Sources */,
+				9C62F1421B2B5C98006FD3A8 /* Label.m in Sources */,
 				9C62F11A1B2B5997006FD3A8 /* main.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
