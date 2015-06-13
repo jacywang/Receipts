@@ -11,14 +11,17 @@
 #import "Receipt.h"
 #import "Label.h"
 
-@interface AddReceiptViewController () <UITableViewDelegate, UITableViewDataSource, UITextFieldDelegate>
+@interface AddReceiptViewController () <UITableViewDelegate, UITableViewDataSource, UITextFieldDelegate, NSFetchedResultsControllerDelegate>
 
 @property (nonatomic) NSMutableArray *labels;
+@property (nonatomic) NSArray *fetchedLabels;
 @property (nonatomic) NSMutableArray *selectedCategories;
 @property (weak, nonatomic) IBOutlet UITextField *amountTextField;
 @property (weak, nonatomic) IBOutlet UITextField *descriptionTextfield;
 @property (weak, nonatomic) IBOutlet UIDatePicker *datePicker;
 @property (weak, nonatomic) IBOutlet UITableView *tableView;
+@property (nonatomic) NSFetchedResultsController *fetchedResultsController;
+@property (nonatomic) NSManagedObjectContext *managedObjectContext;
 
 @end
 
@@ -30,6 +33,10 @@
     self.labels = [NSMutableArray arrayWithObjects:@"Personal", @"Family", @"Business", nil];
     self.datePicker.maximumDate = [NSDate date];
     self.selectedCategories = [[NSMutableArray alloc] init];
+    
+    AppDelegate *appDelegate = [[UIApplication sharedApplication] delegate];
+    self.managedObjectContext = appDelegate.managedObjectContext;
+    self.fetchedLabels = [self.fetchedResultsController fetchedObjects];
 }
 
 - (IBAction)dismissViewController:(UIButton *)sender {
@@ -37,43 +44,57 @@
 }
 
 - (IBAction)saveButtonPressed:(UIButton *)sender {
-    AppDelegate *appDelegate = [[UIApplication sharedApplication] delegate];
-    NSManagedObjectContext *context = appDelegate.managedObjectContext ;
     
     if ([self.amountTextField.text isEqualToString:@""] || [self.descriptionTextfield.text isEqualToString:@""] || [self.tableView indexPathsForSelectedRows].count == 0) {
         [self.selectedCategories removeAllObjects];
         UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error!" message:@"Amount, description and category cannot be empty!" delegate:self cancelButtonTitle:@"OK" otherButtonTitles: nil];
         [alert show];
     } else {
+        NSEntityDescription *labelEntity = [NSEntityDescription entityForName:@"Label" inManagedObjectContext:self.managedObjectContext];
         
-        NSEntityDescription *labelEntity = [NSEntityDescription entityForName:@"Label" inManagedObjectContext:context];
+        NSEntityDescription *receiptEntity = [NSEntityDescription entityForName:@"Receipt" inManagedObjectContext:self.managedObjectContext];
         
-        for (NSIndexPath *indexPath in [self.tableView indexPathsForSelectedRows]) {
-            Label *label = [[Label alloc] initWithEntity:labelEntity insertIntoManagedObjectContext:context];
-            label.labelName = self.labels[indexPath.row];
-            // Save the context.
-            NSError *error = nil;
-            if (![context save:&error]) {
-                // Replace this implementation with code to handle the error appropriately.
-                // abort() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
-                NSLog(@"Unresolved error %@, %@", error, [error userInfo]);
-                abort();
-            } else {
-                [self.selectedCategories addObject:label];
-            }
-        }
-                
-        NSEntityDescription *receiptEntity = [NSEntityDescription entityForName:@"Receipt" inManagedObjectContext:context];
-        
-        Receipt *receipt = [[Receipt alloc] initWithEntity:receiptEntity insertIntoManagedObjectContext:context];
+        Receipt *receipt = [[Receipt alloc] initWithEntity:receiptEntity insertIntoManagedObjectContext:self.managedObjectContext];
         receipt.amount = [NSNumber numberWithFloat:[self.amountTextField.text floatValue]];
         receipt.receiptDescription = self.descriptionTextfield.text;
         receipt.timeStamp = self.datePicker.date;
-        receipt.label = [NSSet setWithArray:self.selectedCategories];
+        
+        BOOL isFound = NO;
+        
+        for (NSIndexPath *indexPath in [self.tableView indexPathsForSelectedRows]) {
+            
+            for (Label *label in self.fetchedLabels) {
+                if ([label.labelName isEqualToString:self.labels[indexPath.row]]) {
+                    NSMutableSet *newSet = [[NSMutableSet alloc] initWithSet:receipt.label];
+                    [newSet addObject:label];
+                    receipt.label = newSet;
+                    isFound = YES;
+                    break;
+                } else {
+                    isFound = NO;
+                }
+            }
+            
+            if (!isFound) {
+                Label *label = [[Label alloc] initWithEntity:labelEntity insertIntoManagedObjectContext:self.managedObjectContext];
+                label.labelName = self.labels[indexPath.row];
+                
+                NSError *error = nil;
+                if (![self.managedObjectContext save:&error]) {
+                    NSLog(@"Unresolved error %@, %@", error, [error userInfo]);
+                    abort();
+                } else {
+                    NSMutableSet *newSet = [[NSMutableSet alloc] initWithSet:receipt.label];
+                    [newSet addObject:label];
+                    receipt.label = newSet;
+                }
+            }
+        }
+        
             
         // Save the context.
         NSError *error = nil;
-        if (![context save:&error]) {
+        if (![self.managedObjectContext save:&error]) {
             // Replace this implementation with code to handle the error appropriately.
             // abort() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
             NSLog(@"Unresolved error %@, %@", error, [error userInfo]);
@@ -125,5 +146,43 @@
     [textField resignFirstResponder];
     return YES;
 }
+
+#pragma mark - NSFetchedResultsController
+
+- (NSFetchedResultsController *)fetchedResultsController
+{
+    if (_fetchedResultsController != nil) {
+        return _fetchedResultsController;
+    }
+    
+    NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+    // Edit the entity name as appropriate.
+    NSEntityDescription *entity = [NSEntityDescription entityForName:@"Label" inManagedObjectContext:self.managedObjectContext];
+    [fetchRequest setEntity:entity];
+    
+    // Set the batch size to a suitable number.
+    [fetchRequest setFetchBatchSize:20];
+    
+    // Edit the sort key as appropriate.
+    NSSortDescriptor *sortDescriptor = [[NSSortDescriptor alloc] initWithKey:@"labelName" ascending:NO];
+    NSArray *sortDescriptors = @[sortDescriptor];
+    
+    [fetchRequest setSortDescriptors:sortDescriptors];
+    
+    // Edit the section name key path and cache name if appropriate.
+    // nil for section name key path means "no sections".
+    NSFetchedResultsController *aFetchedResultsController = [[NSFetchedResultsController alloc] initWithFetchRequest:fetchRequest managedObjectContext:self.managedObjectContext sectionNameKeyPath:nil cacheName:@"Detail"];
+    aFetchedResultsController.delegate = self;
+    self.fetchedResultsController = aFetchedResultsController;
+    
+    NSError *error = nil;
+    if (![self.fetchedResultsController performFetch:&error]) {
+        NSLog(@"Unresolved error %@, %@", error, [error userInfo]);
+        abort();
+    }
+    
+    return _fetchedResultsController;
+}
+
 
 @end

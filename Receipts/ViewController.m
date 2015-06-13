@@ -18,6 +18,7 @@
 @property (nonatomic) NSManagedObjectContext *managedObjectContext;
 @property (weak, nonatomic) IBOutlet UITableView *tableView;
 @property (nonatomic) NSArray *labelsArray;
+@property (nonatomic) NSMutableArray *receiptsArray;
 
 @end
 
@@ -26,15 +27,21 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
-    
-    AppDelegate *appDelegate = [[UIApplication sharedApplication] delegate];
-    self.managedObjectContext = appDelegate.managedObjectContext;
 }
 
 -(void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
     
+    self.fetchedResultsController = nil;
+    
+    AppDelegate *appDelegate = [[UIApplication sharedApplication] delegate];
+    self.managedObjectContext = appDelegate.managedObjectContext;
+    
     self.labelsArray = [NSArray arrayWithArray: [self.fetchedResultsController fetchedObjects]];
+    self.receiptsArray = [[NSMutableArray alloc] init];
+    for (Label *label in self.labelsArray) {
+        [self.receiptsArray addObject:[label receipt].allObjects];
+    }
     
     [self.tableView reloadData];
 }
@@ -42,30 +49,24 @@
 #pragma mark - UITableViewDataSource
 
 -(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-    return [self.fetchedResultsController sections].count;
+    return self.labelsArray.count;
 }
 
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    id<NSFetchedResultsSectionInfo> sectionInfo = [self.fetchedResultsController sections][section];
-    
-    return [sectionInfo numberOfObjects];
+    return [self.receiptsArray[section] count];
 }
 
 
 -(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"Cell" forIndexPath:indexPath];
-    
-    Label *label = [self.fetchedResultsController objectAtIndexPath:indexPath];
-    
-//    cell.textLabel.text = [receipts[indexPath.row] receiptDescription];
-    
+
+    cell.textLabel.text = [self.receiptsArray[indexPath.section][indexPath.row] receiptDescription];
+
     return cell;
 }
 
 -(NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
-    id<NSFetchedResultsSectionInfo> sectionInfo = [self.fetchedResultsController sections][section];
-    
-    return [sectionInfo name];
+    return [self.labelsArray[section] labelName];
 }
 
 #pragma mark - UITableViewDelegate
